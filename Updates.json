@@ -1,1 +1,1 @@
-{"8.1": {"files": ["ParsePackets.py", "ShopModule.py", "Core.py"], "changelog": ["Fix done visual.", "Fix shop items.", "Fix villages NPCs."]}}
+{"8.1": {"files": [["ParsePackets.py", "modules"], ["ShopModule.py", "modules"], ["Core.py", "init"]], "changelog": ["Fix done visual.", "Fix shop items.", "Fix villages NPCs."]}}
