@@ -1933,7 +1933,7 @@ class ParsePackets:
 
         elif C == Identifiers.recv.Transformice.C:
             if CC == Identifiers.recv.Transformice.Invocation:
-                objectCode, posX, posY, rotation, position, invocation = packet.readShort(), packet.readShort(), packet.readShort(), packet.readShort(), packet.readUTF(), packet.readBool()
+                objectCode, posX, posY, rotation, position, invocation = data.readShort(), data.readShort(), data.readShort(), data.readShort(), data.readUTF(), data.readBool()
                 this.client.room.sendAllOthers(this.client, Identifiers.send.Invocation, ByteArray().writeInt(this.client.playerCode).writeShort(objectCode).writeShort(posX).writeShort(posY).writeShort(rotation).writeUTF(position).writeBool(invocation).toByteArray())
                 if this.client.room.L != None:
                     this.client.room.L.execute("""
