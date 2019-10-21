@@ -3312,6 +3312,7 @@ class Server:
         this.configsInt("Last Topic ID", str(this.lastTopicID))
         this.configsInt("Last Post ID", str(this.lastPostID))
         this.configsInt("Time Event", str(this.timeEvent))
+        this.configsInt("Project Version", str(this.projectVersion))
         this.configsBool("Reset Maps", str(1 if this.resetMaps else 0))
 
     def getPointsColor(this, playerName, aventure, itemID, itemType, itemNeeded):
