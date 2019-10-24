@@ -79,7 +79,7 @@ class Client(asyncore.dispatcher):
         this.roomName = ""
         this.shopItems = ""
         this.shamanItems = ""
-        this.playerLook = "1;0,0,0,0,0,0,0,0,0"
+        this.playerLook = "1;0,0,0,0,0,0,0,0,0,0,0"
         this.shamanLook = "0,0,0,0,0,0,0,0,0,0"
         this.lastMessage = ""
         this.modoPwetLangue = "ALL"
@@ -537,7 +537,6 @@ class Client(asyncore.dispatcher):
                     this.lastDataID = random.randint(0, 99)
                     this.validatingVersion = True
                     this.sendCorrectVersion()
-                    this.sendPing()
         else:
             if data == "" or data == " ":
                 this.server.tempIPBanList.append(this.ipAddress)
@@ -551,7 +550,7 @@ class Client(asyncore.dispatcher):
 
     def sendPing(this):
         this.pingTime = round(_time.time() * 1000)
-        TFMUtils.callLater(10, this.sendPing)
+        #TFMUtils.callLater(10, this.sendPing)
 
     def sendAddPopupText(this, id, x, y, l, a, fur1, fur2, opcit, Message):
         bg = int(fur1, 16)
@@ -607,7 +606,7 @@ class Client(asyncore.dispatcher):
                 this.server.removeTempBan(playerName)
             else:
                 this.sendPacket(Identifiers.old.send.Player_Ban_Login, [
-                                timeCalc, str(banInfo[1])])
+                                3600000 * timeCalc, str(banInfo[1])])
                 this.loseConnection()
                 return
 
@@ -1005,7 +1004,7 @@ class Client(asyncore.dispatcher):
     def createAccount(this, playerName, password, email):
         this.server.lastPlayerID += 1
         this.server.updateConfig()
-        this.Cursor.execute("insert into Users values (?, ?, ?, 1, ?, ?, 0, 0, 0, 0, 5000, ?, ?, 5000, 5000, 5000, 1000, 0, '', '', '', '1;0,0,0,0,0,0,0,0,0', '0,0,0,0,0,0,0,0,0,0', '78583a', '95d9d6', '', ?, '', '', '', '', '', '', '', '', '', 0, '300/0/0', '', 0, '', '', 0, 0, '', '', '', '', '1000,800,20000,10000', '1500,10000,10000,10000', 0, '', '', 0, 0, 0, 0, '', 0, '', 0, '{}', '', 0, 0, '2,8,0,0,0,189,133,0,0', '35:0;2381:0;14:0;13:0;2382:0;15:0', ?, 0, ?, 0, '', '0,0,0,1,1',  0)", [
+        this.Cursor.execute("insert into Users values (?, ?, ?, 1, ?, ?, 0, 0, 0, 0, 5000, ?, ?, 5000, 5000, 5000, 1000, 0, '', '', '', '1;0,0,0,0,0,0,0,0,0,0,0', '0,0,0,0,0,0,0,0,0,0', '78583a', '95d9d6', '', ?, '', '', '', '', '', '', '', '', '', 0, '300/0/0', '', 0, '', '', 0, 0, '', '', '', '', '1000,800,20000,10000', '1500,10000,10000,10000', 0, '', '', 0, 0, 0, 0, '', 0, '', 0, '{}', '', 0, 0, '2,8,0,0,0,189,133,0,0', '35:0;2381:0;14:0;13:0;2382:0;15:0', ?, 0, ?, 0, '', '0,0,0,1,1',  0)", [
                             playerName, password, this.server.lastPlayerID, this.Langue, email, this.server.initialCheeses, this.server.initialFraises, TFMUtils.getTime(), str(this.server.adventureID) + ':0', this.ddhj])
         this.Cursor.execute("insert into DailyQuest values (?, '237129', '0', '20', '0', '20', '1')", [
                             this.server.lastPlayerID])
@@ -1485,11 +1484,11 @@ class Client(asyncore.dispatcher):
         #this.sendNPC(1, 6, "Theus", 336, "80;132,0,0,0,0,0,0,1,0,0", 1710, 767, 11, 0)
 
     def sendNPC(this, id, id2, name, title, look, px, py, mode, s, end):
-        this.sendPacket([8, 30], ByteArray().writeShort(id).writeShort(id2).writeUTF(name).writeShort(title).writeByte(
-            1).writeUTF(look).writeShort(px).writeShort(py).writeShort(mode).writeByte(s).writeShort(end).toByteArray())
+        this.sendPacket([8, 30], ByteArray().writeShort(id).writeShort(id2).writeUTF(name).writeShort(title).writeBool(
+            True).writeUTF(look).writeShort(px).writeShort(py).writeShort(mode).writeByte(s).writeShort(end).toByteArray())
 
     def getPlayerData(this, isTribunal):
-        return ByteArray().writeUTF((this.mouseName if this.mouseName != "" else this.Username) if not isTribunal else "Souris").writeInt(this.playerCode).writeBool(this.isShaman).writeBool(this.isDead).writeShort(this.playerScore).writeBool(this.hasCheese).writeShort(this.TitleNumber if not isTribunal else 0).writeByte(this.TitleStars if not isTribunal else 0).writeByte(this.gender).writeUTF("").writeUTF(this.playerLook if not this.room.isBootcamp or not isTribunal else "1;0,0,0,0,0,0,0,0,0").writeBool(False).writeInt(int(this.MouseColor, 16)).writeInt(int(this.ShamanColor, 16)).writeInt(0).writeInt(int(this.NameColor, 16) if this.NameColor != "" else -1).toByteArray()
+        return ByteArray().writeUTF((this.mouseName if this.mouseName != "" else this.Username) if not isTribunal else "Souris").writeInt(this.playerCode).writeBool(this.isShaman).writeBool(this.isDead).writeShort(this.playerScore).writeBool(this.hasCheese).writeShort(this.TitleNumber if not isTribunal else 0).writeByte(this.TitleStars if not isTribunal else 0).writeByte(this.gender).writeUTF("").writeUTF(this.playerLook if not this.room.isBootcamp or not isTribunal else "1;0,0,0,0,0,0,0,0,0,0,0").writeBool(False).writeInt(int(this.MouseColor, 16)).writeInt(int(this.ShamanColor, 16)).writeInt(0).writeInt(int(this.NameColor, 16) if this.NameColor != "" else -1).toByteArray()
 
     def sendShamanCode(this, shamanCode, shamanCode2):
         this.sendShaman(shamanCode, shamanCode2, this.server.getShamanType(shamanCode), this.server.getShamanType(shamanCode2), this.server.getShamanLevel(
@@ -2096,7 +2095,7 @@ class Client(asyncore.dispatcher):
         player = this.server.players.get(playerName)
         if player != None and not player.isGuest:
             packet = ByteArray().writeUTF(player.Username).writeInt(player.playerID).writeInt(player.regDate).writeByte(
-                {1: 1, 2: 1, 3: 13, 4: 13, 5: 11, 6: 11, 7: 5, 8: 5, 9: 10, 10: 10, 11: 10, 12: 12}[player.privLevel]).writeByte(player.gender).writeUTF(player.tribeName).writeUTF(player.marriage)
+                {1: 1, 2: 1, 5: 13, 6: 11, 7: 1, 8: 5, 9: 10, 10: 10, 11: 10, 12: 12}[player.privLevel]).writeByte(player.gender).writeUTF(player.tribeName).writeUTF(player.marriage)
             for stat in [player.shamanSaves, player.shamanCheeses, player.firstCount, player.cheeseCount, player.hardModeSaves, player.bootcampCount, player.divineModeSaves]:
                 packet.writeInt(stat)
 
@@ -2109,16 +2108,9 @@ class Client(asyncore.dispatcher):
             packet.writeUTF(player.playerLook + ';' + player.MouseColor)
             packet.writeShort(player.shamanLevel)
             packet.writeShort(len(list(player.shopBadges)) * 2)
-            badges = map(int, player.shopBadges)
-            for badge in [120, 121, 122, 123, 124, 125, 126, 127, 145, 42, 54, 55, 0, 1, 6, 7, 9, 16, 17, 18, 28, 29, 30, 33, 34, 35, 46, 47, 50, 51, 57, 58, 59, 64, 65, 69, 71, 73, 129, 130, 131, 132, 133, 134, 139, 142, 144, 147, 153, 154, 158, 161, 162, 169, 170]:
-                if badge in badges:
-                    packet.writeShort(badge).writeShort(player.racingStats[0] / 1500 if badge == 124 else (player.racingStats[1] / 10000 if badge == 125 else (player.racingStats[2] / 10000 if badge == 127 else (player.racingStats[3] / 10000 if badge == 126 else (
-                        player.survivorStats[0] / 1000 if badge == 120 else (player.survivorStats[1] / 800 if badge == 121 else (player.survivorStats[2] / 20000 if badge == 122 else (player.survivorStats[3] / 10000 if badge == 123 else 0))))))))
-                    badges.remove(int(badge))
-
-            for badge in badges:
+            for badge in player.shopBadges:
                 packet.writeShort(badge).writeShort(player.racingStats[0] / 1500 if badge == 124 else (player.racingStats[1] / 10000 if badge == 125 else (player.racingStats[2] / 10000 if badge == 127 else (player.racingStats[3] / 10000 if badge == 126 else (
-                    player.survivorStats[0] / 1000 if badge == 120 else (player.survivorStats[1] / 800 if badge == 121 else (player.survivorStats[2] / 20000 if badge == 122 else (player.survivorStats[3] / 10000 if badge == 123 else 0))))))))
+                        player.survivorStats[0] / 1000 if badge == 120 else (player.survivorStats[1] / 800 if badge == 121 else (player.survivorStats[2] / 20000 if badge == 122 else (player.survivorStats[3] / 10000 if badge == 123 else 0))))))))
 
             stats = [[30, player.racingStats[0], 1500, 124], [31, player.racingStats[1], 10000, 125], [33, player.racingStats[2], 10000, 127], [32, player.racingStats[3], 10000, 126], [
                 26, player.survivorStats[0], 1000, 120], [27, player.survivorStats[1], 800, 121], [28, player.survivorStats[2], 20000, 122], [29, player.survivorStats[3], 10000, 123]]
@@ -2137,7 +2129,7 @@ class Client(asyncore.dispatcher):
             count = 0
             for c in player.aventurePoints.values():
                 count += c
-            packet.writeBool(True).writeInt(count)
+            packet.writeBool(False).writeInt(count)
 
             this.sendPacket(Identifiers.send.Profile, packet.toByteArray())
 
@@ -3290,9 +3282,8 @@ class Server:
         this.divineModeTitleList = {500: 324.1, 2000: 325.1, 4000: 326.1, 7000: 327.1, 10000: 328.1,
                                     14000: 329.1, 18000: 330.1, 22000: 331.1, 26000: 332.1, 30000: 333.1, 40000: 334.1}
         this.shopBadges = {2227: 2, 2208: 3, 2202: 4, 2209: 5, 2228: 8, 2218: 10, 2206: 11, 2219: 12, 2229: 13, 2230: 14, 2231: 15, 2211: 19, 2232: 20, 2224: 21, 2217: 22, 2214: 23, 2212: 24, 2220: 25, 2223: 26, 2234: 27, 2203: 31, 2205: 38, 2220: 25, 2221: 32, 2215: 37, 2222: 39, 2236: 36, 2204: 40, 2238: 41, 2239: 43, 2241: 44, 2243: 45, 2244: 48, 2207: 49, 2246: 52, 2247: 53, 210: 54, 2225: 56, 2213: 60, 2248: 61, 2226: 62,
-                           2249: 63, 2250: 66, 2252: 67, 2253: 68, 2254: 69, 2254: 70, 10132: 71, 2255: 72, 2256: 128, 10133: 129, 422: 130, 124: 73, 2257: 135, 2258: 136, 2259: 137, 2260: 138, 2262: 140, 2263: 143, 2264: 146, 2265: 148, 2267: 149, 2268: 150, 2269: 151, 2270: 152, 2271: 155, 2272: 156, 2273: 157, 2274: 160, 2276: 165, 2277: 167, 2278: 171, 2279: 173, 2280: 175, 2281: 176, 2282: 177, 2283: 178, 2284: 179, 2285: 180, 2286: 183, 2287: 185}
-        this.inventory = [2202, 2203, 2204, 2227, 2235, 2257, 2261, 2253, 2254, 2260, 2261, 2263, 2264, 2265, 2266, 2267, 2268, 2269, 2270, 2271, 2272, 2273, 2274, 2275, 2276, 2277, 2278, 2279, 2280, 2281, 2282, 2283, 2284, 2285, 2286, 2287,
-                          2288, 2289, 2290, 2291, 2292, 2293, 2294, 2295, 2296, 2297, 2298, 2299, 2300, 2301, 2302, 2303, 2304, 2305, 2306, 2310, 2311, 2312, 2313, 2314, 2315, 2316, 2317, 2318, 2319, 2320, 2321, 2322, 2323, 2324, 2325, 2326, 2327, 2328]
+                           2249: 63, 2250: 66, 2252: 67, 2253: 68, 2254: 69, 2254: 70, 10132: 71, 2255: 72, 2256: 128, 10133: 129, 422: 130, 124: 73, 2257: 135, 2258: 136, 2259: 137, 2260: 138, 2262: 140, 2263: 143, 2264: 146, 2265: 148, 2267: 149, 2268: 150, 2269: 151, 2270: 152, 2271: 155, 2272: 156, 2273: 157, 2274: 160, 2276: 165, 2277: 167, 2278: 171, 2279: 173, 2280: 175, 2281: 176, 2282: 177, 2283: 178, 2284: 179, 2285: 180, 2286: 183, 2287: 185, 2288:186, 2289:187, 2290:189, 2291:191, 2292:192, 2293:194, 2294:195, 2295:196, 2296:197, 2297:199, 2298:200, 2299:201, 230100:203, 230101:204, 230102:205, 230103:206, 230104:207, 230105:208, 230106:210, 230107:211, 230108:212, 230110: 214, 230111: 215, 230112: 216, 230113: 217, 230114: 220, 230115: 222, 230116: 223, 230117: 224, 230118: 225, 230119: 226, 230120: 227, 230121: 228, 230122: 229, 230123: 231, 230124: 232, 230125: 233, 230126: 234, 230127: 235, 230128: 236, 230129: 237, 230130: 238, 230131: 239, 230132: 241, 230133: 242, 230134: 243, 230135: 244, 230136: 245, 230137: 246, 230138: 247, 230139: 248}
+        this.inventory = [2236, 2202, 2203, 2204, 2227, 2235, 2257, 2261, 2253, 2254, 2260, 2261, 2263, 2264, 2265, 2266, 2267, 2268, 2269, 2270, 2271, 2272, 2273, 2274, 2275, 2276, 2277, 2278, 2279, 2280, 2281, 2282, 2283, 2284, 2285, 2286, 2287, 2288, 2289, 2290, 2291, 2292, 2293, 2294, 2295, 2296, 2297, 2298, 2299, 2300, 2301, 2302, 2303, 2304, 2305, 2306, 2310, 2311, 2312, 2313, 2314, 2315, 2316, 2317, 2318, 2319, 2320, 2321, 2322, 2323, 2324, 2325, 2326, 2327, 2328]
         # Others
         this.Cursor = Cursor
         this.parseShop()
@@ -3466,7 +3457,7 @@ class Server:
     def disconnectIPAddress(this, ip):
         for client in this.players.values():
             if client.ipAddress == ip:
-                client.transport.loseConnection()
+                client.loseConnection()
 
     def checkExistingUser(this, playerName):
         this.Cursor.execute(

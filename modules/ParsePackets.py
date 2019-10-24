@@ -652,7 +652,10 @@ class ParsePackets:
                 return
 
             elif CC == Identifiers.recv.Player.Ping:
+                this.client.sendPing()
                 this.client.sendPacket([28, 6])
+                this.client.ping = int(
+                    round(_time.time() * 1000) - this.client.pingTime)
                 return
 
             elif CC == Identifiers.recv.Player.Meep:
@@ -1597,8 +1600,6 @@ class ParsePackets:
                 return
 
             elif CC == Identifiers.recv.Informations.Player_Ping:
-                this.client.ping = int(
-                    round(_time.time() * 1000) - this.client.pingTime)
                 return
 
             elif CC == Identifiers.recv.Informations.Change_Shaman_Type:

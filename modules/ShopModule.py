@@ -83,9 +83,7 @@ class ShopModule:
 
     def getItemCustomization(this, checkItem, isShamanShop):
         items = this.client.shamanItems if isShamanShop else this.client.shopItems
-        if items == "":
-            return ""
-        else:
+        if not items == "":
             splitedItems = items.split(",")
             for shopItem in splitedItems:
                 itemSplited = shopItem.split("_")
@@ -280,7 +278,7 @@ class ShopModule:
 
     def sendItemBuy(this, fullItem):
         this.client.sendPacket(Identifiers.send.Item_Buy, ByteArray(
-        ).writeInt(fullItem).writeByte(int(0)).toByteArray())
+        ).writeInt(fullItem).writeByte(1).toByteArray())
 
     def sendUnlockedBadge(this, badge):
         this.client.room.sendAll(Identifiers.send.Unlocked_Badge, ByteArray().writeInt(
@@ -288,19 +286,17 @@ class ShopModule:
 
     def sendGiftResult(this, type, playerName):
         this.client.sendPacket(Identifiers.send.Gift_Result, ByteArray().writeByte(
-            type).writeByte(0).writeUTF(playerName).writeByte(0).writeShort(0).toByteArray())
+            type).writeUTF(playerName).writeByte(0).writeShort(0).toByteArray())
 
     def buyItem(this, packet):
         fullItem, withFraises = packet.readInt(), packet.readBool()
-        fullItem = 230100 + (32044 + fullItem) if fullItem < 0 else fullItem
-        itemCat = (0 if fullItem // 10000 == 1 else fullItem //
-                   10000 - 1) if fullItem > 9999 else fullItem // 100
+        itemCat = ((fullItem - 10000) // 10000) if fullItem > 9999 else fullItem // 100
         item = fullItem % 1000 if fullItem > 9999 else fullItem % 100 if fullItem > 999 else fullItem % (
             100 * itemCat) if fullItem > 99 else fullItem
-        price = this.getItemPromotion(itemCat, item, this.server.shopListCheck[
-                                      str(itemCat) + "|" + str(item)][1 if withFraises else 0])
         this.client.shopItems += str(
             fullItem) if this.client.shopItems == "" else "," + str(fullItem)
+        price = this.getItemPromotion(itemCat, item, this.server.shopListCheck[
+                                      str(itemCat) + "|" + str(item)][1 if withFraises else 0])
         if withFraises:
             this.client.shopFraises -= price
         else:
@@ -320,11 +316,14 @@ class ShopModule:
 
     def equipItem(this, packet):
         fullItem = packet.readInt()
-        fullItem = 230100 + (32044 + fullItem) if fullItem < 0 else fullItem
+        itemStr = str(fullItem)
         itemCat = (0 if fullItem // 10000 == 1 else fullItem //
-                   10000 - 1) if fullItem > 9999 else fullItem // 100
-        item = fullItem % 1000 if fullItem > 9999 else fullItem % 100 if fullItem > 999 else fullItem % (
-            100 * itemCat) if fullItem > 99 else fullItem
+                   10000) if len(itemStr) > 4 else fullItem // 100
+        item = int(itemStr[2 if len(itemStr) > 3 else 1:]) if len(itemStr) >= 3 else fullItem
+        itemStr = str(item)
+
+        equip = str(item) + this.getItemCustomization(fullItem, False)
+
         lookList = this.client.playerLook.split(";")
         lookItems = lookList[1].split(",")
         lookCheckList = lookItems[:]
@@ -335,15 +334,14 @@ class ShopModule:
             i += 1
 
         if itemCat <= 10:
-            lookItems[itemCat] = "0" if lookCheckList[itemCat] == str(
-                item) else str(item) + this.getItemCustomization(fullItem, False)
+            lookItems[itemCat] = "0" if lookCheckList[itemCat] == itemStr else str(equip)
         elif itemCat == 21:
             lookList[0] = "1"
             color = "bd9067" if item == 0 else "593618" if item == 1 else "8c887f" if item == 2 else "dfd8ce" if item == 3 else "4e443a" if item == 4 else "e3c07e" if item == 5 else "272220" if item == 6 else "78583a"
             this.client.MouseColor = "78583a" if this.client.MouseColor == color else color
         else:
-            lookList[0] = "1" if lookList[0] == str(item) else str(item)
-            this.client.MouseColor = "78583a"
+            lookList[0] = "1" if lookList[0] == itemStr else itemStr
+            #this.client.MouseColor = "78583a"
 
         this.client.playerLook = lookList[
             0] + ";" + ",".join(map(str, lookItems))
@@ -364,6 +362,13 @@ class ShopModule:
             this.client.shopFraises -= 20
         else:
             this.client.shopCheeses -= 2000
+
+        if len(this.client.custom) == 1:
+            if not fullItem in this.client.custom:
+                this.client.custom.append(fullItem)
+        else:
+            if not str(fullItem) in this.client.custom:
+                this.client.custom.append(str(fullItem))
 
         this.sendShopList(False)
 
