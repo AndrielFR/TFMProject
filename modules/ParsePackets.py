@@ -1176,38 +1176,38 @@ class ParsePackets:
                     elif event == "config:music:funk":
                         this.client.config.closeoption()
                         this.client.sendPacket(Identifiers.old.send.Music, [
-                                               "http://216.245.204.229:8054/live"])
-                        this.client.musicNameLink = ""
+                                               "http://server04.stmsg.top:7462/stream/1/"])
+                        this.client.musicNameLink = "http://server04.stmsg.top:7462/currentsong?sid=1"
                         this.client.musicOn = 1
                         this.client.sendLangueMessage(
                             "", "<PT>[•]<N> Rádio Funk ligada.")
-                        this.client.musicName = 0
-                        this.client.config.musicName(0)
+                        this.client.musicName = 1
+                        this.client.config.musicName(1)
                     elif event == "config:music:eletronica":
                         this.client.config.closeoption()
                         this.client.sendPacket(Identifiers.old.send.Music, [
-                                               "http://live.hunter.fm/fresh"])
-                        this.client.musicNameLink = ""
+                                               "http://213.251.190.165/pulsHD.mp3"])
+                        this.client.musicNameLink = "http://213.251.190.165/currentsong?sid=1"
                         this.client.musicOn = 1
                         this.client.sendLangueMessage(
                             "", "<PT>[•]<N> Rádio Eletrônica ligada.")
-                        this.client.musicName = 0
-                        this.client.config.musicName(0)
+                        this.client.musicName = 1
+                        this.client.config.musicName(1)
                     elif event == "config:music:sertaneja":
                         this.client.config.closeoption()
                         this.client.sendPacket(Identifiers.old.send.Music, [
-                                               "http://live.hunter.fm/country"])
-                        this.client.musicNameLink = ""
+                                               "https://s04.maxcast.com.br:8274/live?1572114536639"])
+                        this.client.musicNameLink = "https://s04.maxcast.com.br/api/status/sertanejafm1029/current.json"
                         this.client.musicOn = 1
                         this.client.sendLangueMessage(
                             "", "<PT>[•]<N> Rádio Sertaneja ligada.")
-                        this.client.musicName = 0
-                        this.client.config.musicName(0)
+                        this.client.musicName = 1
+                        this.client.config.musicName(1)
                     elif event == "config:music:rap":
                         this.client.config.closeoption()
                         this.client.sendPacket(Identifiers.old.send.Music, [
-                                               "https://s41.maxcast.com.br:8016/live"])
-                        this.client.musicNameLink = "https://s41.maxcast.com.br/api/status/radiorapnacional/current.json"
+                                               "66.85.88.174/hot108"])
+                        this.client.musicNameLink = ""
                         this.client.musicOn = 1
                         this.client.sendLangueMessage(
                             "", "<PT>[•]<N> Rádio RAP ligada.")
@@ -1216,13 +1216,13 @@ class ParsePackets:
                     elif event == "config:music:pop":
                         this.client.config.closeoption()
                         this.client.sendPacket(Identifiers.old.send.Music, [
-                                               "http://audio3.cmaudioevideo.com:8050/stream"])
-                        this.client.musicNameLink = ""
+                                               "http://46.252.154.133:58080/stream.mp3"])
+                        this.client.musicNameLink = "http://46.252.154.133:58080/currentsong?sid=1"
                         this.client.musicOn = 1
                         this.client.sendLangueMessage(
                             "", "<PT>[•]<N> Rádio POP ligada.")
-                        this.client.musicName = 0
-                        this.client.config.musicName(0)
+                        this.client.musicName = 1
+                        this.client.config.musicName(1)
                     elif event == "config:music:mix":
                         this.client.config.closeoption()
                         this.client.sendPacket(Identifiers.old.send.Music, [
@@ -1811,6 +1811,15 @@ class ParsePackets:
                             this.client.sendPlaceObject(this.client.room.objectID if id == 11 else 0, 65 if id == 1 else 6 if id == 5 else 34 if id == 6 else 89 if id == 8 else 90 if id == 11 else 33 if id == 20 else 63 if id == 24 else 80 if id ==
                                                         25 else 95 if id == 26 else 0, this.client.posX + 28 if this.client.isMovingRight else this.client.posX - 28, this.client.posY, 0, 0 if id == 11 or id == 24 else 10 if this.client.isMovingRight else -10, -3, True, True)
 
+                        if id == 10:
+                            x = 0
+                            for player in this.client.room.clients.values():
+                                if x < 5 and player != this.client:
+                                    if player.posX >= this.client.posX - 400 and player.posX <= this.client.posX + 400:
+                                        if player.posY >= this.client.posY - 300 and player.posY <= this.client.posY + 300:
+                                            player.sendPlayerEmote(3, "", False, False)
+                                            x += 1
+
                         if id in [9, 12, 13, 17, 18, 19, 22, 27, 2251]:
                             pass
 
@@ -1834,6 +1843,15 @@ class ParsePackets:
                             if len(this.client.shamanBadges) > 0:
                                 this.client.room.sendAll(Identifiers.send.Balloon_Badge, ByteArray().writeInt(
                                     this.client.playerCode).writeByte(random.randint(0, len(this.client.shopBadges))).toByteArray())
+
+                        if id == 800:
+                            this.client.shopCheeses += 5
+                            this.client.sendAnimZelda(2, 0)
+                            this.client.sendGiveCurrency(0, 5)
+
+                        if id == 801:
+                            this.client.shopFraises += 5
+                            this.client.sendAnimZelda(2, 2)
 
                         if id == 2100:
                             ids = random.choice([0, 1, 2, 3, 4, 5, 6, 8, 10, 11, 14, 15, 16, 20, 21, 24, 25, 26, 28, 29, 30, 31,
@@ -1878,10 +1896,17 @@ class ParsePackets:
                         if id == 2246:
                             this.client.sendPlayerEmote(24, "", False, False)
 
-                        if id == 2252:
+                        if id in [2252, 2256, 2349, 2379]:
+                            colors = {2252:"56C93E", 2256:"C93E4A", 2349:"52BBFB", 2379:"FF8400"}
                             if not this.client.isShaman:
                                 this.client.sendPacket(Identifiers.send.Crazzy_Packet, ByteArray(
-                                ).writeByte(1).writeShort(600).writeInt(5687614).toByteArray())
+                                ).writeByte(1).writeShort(650).writeInt(int(colors[id], 16)).toByteArray())
+
+                        if id == 2255:
+                            this.client.sendAnimZelda2(7, random.randint(0, 6))
+
+                        if id == 2259:
+                            this.client.room.sendAll(Identifiers.send.Crazzy_Packet, ByteArray().writeByte(5).writeInt(this.client.playerCode).writeShort(this.client.timeConnected["total"] // 86400).writeByte((this.client.timeConnected["total"] // 3600) % 24));
 
                         this.client.updateInventoryConsumable(
                             id, this.client.playerConsumables[id])
@@ -2251,8 +2276,7 @@ class ParsePackets:
 
             elif CC == Identifiers.old.recv.Map.Return_To_Editor:
                 this.client.room.EMapCode = 0
-                this.client.sendPacket(
-                    Identifiers.old.send.Map_Editor, ["", ""])
+                this.client.sendPacket(Identifiers.old.send.Map_Editor, ["", ""])
                 return
 
             elif CC == Identifiers.old.recv.Map.Export_Map:
