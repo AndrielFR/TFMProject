@@ -796,8 +796,8 @@ class Client(asyncore.dispatcher):
             this.skillModule.sendExp(
                 this.shamanLevel, this.shamanExp, this.shamanExpNext)
 
-            this.sendGuestLogin()
             this.sendPlayerIdentification()
+            this.sendLogin()
             this.startBulle(this.server.checkRoom(startRoom, this.Langue) if not startRoom ==
                             "" and not startRoom == "1" else this.server.recommendRoom(this.Langue))
             this.shopModule.sendShamanItems()
@@ -1151,8 +1151,6 @@ class Client(asyncore.dispatcher):
                             TFMUtils.callLater(0.1, this.PokeLua.getAdmin)
 
         if this.room != None:
-            if this.room.isEditeur:
-                this.sendPacket(Identifiers.old.send.Map_Editor, ["0"])
             if this.room.L != None:
                 this.room.L.execute("""
                 if (type(eventPlayerLeft) == "function") then
@@ -1161,12 +1159,13 @@ class Client(asyncore.dispatcher):
                 """)
             this.room.removeClient(this)
 
+        this.roomName = roomName
         this.sendGameType(11 if "music" in roomName else 1 if "madchees" in roomName else 4,
                           4 if "madchees" in roomName else 0)
-        this.roomName = roomName
         this.sendEnterRoom(roomName)
         this.server.addClientToRoom(this, roomName)
         this.sendPacket(Identifiers.old.send.Anchors, this.room.anchors)
+        this.sendPacket([29, 1], "")
         this.LoadCountTotem = False
         this.config.musicName(this.musicName)
 
@@ -1307,7 +1306,7 @@ class Client(asyncore.dispatcher):
                 eventNewGame()
             end
             """)
-        this.sendMap(False, True) if this.room.mapCode != -1 else this.sendMap(
+        this.sendMap(newMapCustom=True) if this.room.mapCode != -1 else this.sendMap(
         ) if this.room.isEditeur and this.room.EMapCode != 0 else this.sendMap(True)
 
         shamanCode, shamanCode2 = 0, 0
@@ -1509,7 +1508,8 @@ class Client(asyncore.dispatcher):
                         ByteArray().writeByte(0).toByteArray())
         #this.awakeTimer = TFMUtils.callLater(120, this.transport.loseConnection)
 
-    def sendGuestLogin(this):
+    def sendLogin(this):
+        this.sendPacket(Identifiers.old.send.Login, [this.Username, this.playerCode, this.privLevel, 30, 1 if this.isGuest else 0, 0, 0, 0])
         if this.isGuest:
             this.sendPacket(Identifiers.send.Login_Souris, ByteArray(
             ).writeByte(1).writeByte(10).toByteArray())
@@ -1521,8 +1521,32 @@ class Client(asyncore.dispatcher):
             ).writeByte(4).writeByte(200).toByteArray())
 
     def sendPlayerIdentification(this):
-        this.sendPacket(Identifiers.send.Player_Identification, ByteArray().writeInt(this.playerID).writeUTF(this.Username).writeInt(this.timeConnected["total"] if this.privLevel < 7 else 6000000).writeByte(this.langueByte).writeInt(this.playerCode).writeBool(this.privLevel >= 1).writeByte(
-            5 if this.privLevel >= 6 else (1 if this.privLevel == 5 else this.privLevel)).writeByte(5 if this.privLevel >= 6 else (3 if this.privLevel == 5 else this.privLevel)).writeBool(this.privLevel >= 5).writeByte(this.privLevel).writeByte(-1).writeByte(-1).writeByte(-1).toByteArray())
+        d = ByteArray().writeInt(this.playerID).writeUTF(this.Username).writeInt(this.timeConnected["total"] if this.privLevel < 7 else 6000000).writeByte(this.langueByte).writeInt(this.playerCode).writeBool(not this.isGuest)
+
+        positions = {1:9, 2:5, 3:7, 4:7, 5:5, 7:6, 8:3, 9:4, 10:10}
+        chats = []
+        for chat, level in positions.items():
+            if this.privLevel >= level:
+                chats.append(chat)
+
+        # -1: Global pink
+        # 0: Global mod
+        # 1: Global server
+        # 2: Arbitre
+        # 3: Modo
+        # 4: Modo (All)
+        # 5: Arbitre (All)
+        # 6: Global green
+        # 7: MapCrew
+        # 8: LuaTeam
+        # 9: FunCorp
+        # 10: Fashion Squad
+
+        d.writeByte(len(positions))
+        for chat in chats:
+            d.writeByte(chat)
+
+        this.sendPacket(Identifiers.send.Player_Identification, d.writeBool(False).toByteArray())
         this.sendPacket([100, 6], "\x00\x00")
         this.sendPacket([29, 1], "")
         this.sendPacket([29, 5], "")
@@ -2417,11 +2441,12 @@ class Client(asyncore.dispatcher):
     def checkVip(this, vipTime):
         days = TFMUtils.getDiffDays(vipTime)
         if days <= 0:
+            this.realLevel = 1
             this.privLevel = 1
             if this.TitleNumber == 1100:
                 this.TitleNumber = 0
 
-            this.sendMessage("O seu VIP se estogou.")
+            this.sendMessage("O seu VIP se esgotou.")
             this.Cursor.execute(
                 "update users set VipTime = 0 where Username = ?", [this.Username])
         else:
@@ -4171,13 +4196,13 @@ class Room:
 
         roomNameCheck = this.roomName[
             1:] if this.roomName.startswith("*") else this.roomName
-        if this.roomName.startswith(chr(3) + "[Editeur] "):
+        if this.roomName.startswith("\x03[Editeur] "):
             this.countStats = False
             this.isEditeur = True
             this.maxPlayers = 1
             this.never20secTimer = True
 
-        elif this.roomName.startswith(chr(3) + "[Tutorial] "):
+        elif this.roomName.startswith("\x03[Tutorial] "):
             this.countStats = False
             this.currentMap = 900
             this.maxPlayers = 1
@@ -4186,7 +4211,7 @@ class Room:
             this.never20secTimer = True
             this.isTutorial = True
 
-        elif this.roomName.startswith(chr(3) + "[Totem] "):
+        elif this.roomName.startswith("\x03[Totem] "):
             this.countStats = False
             this.specificMap = True
             this.currentMap = 444
@@ -4194,7 +4219,7 @@ class Room:
             this.isTotemEditeur = True
             this.never20secTimer = True
 
-        elif this.roomName.startswith("*" + chr(3)):
+        elif this.roomName.startswith("*\x03"):
             this.countStats = False
             this.isTribeHouse = True
             this.autoRespawn = True
