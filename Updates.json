@@ -1,1 +1,1 @@
-{"8.4": {"files": [["Core.py", "init"], ["Others.py", "modules"], ["ParsePackets.py", "modules"], ["TFMUtils.py", "utils"]], "changelog": ["Fix radios."]}}
+{"8.4": {"files": [["Core.py", "init"], ["Others.py", "modules"], ["ParsePackets.py", "modules"], ["TFMUtils.py", "utils"]], "changelog": ["Fix radios.", "Fix ping."]}}
