@@ -1,1 +1,1 @@
-{"8.3": {"files": [["Core.py", "init"], ["ShopModule.py", "modules"], ["ParsePackets.py", "modules"]], "changelog": ["Fix equip/unequip on shop.", "Fix customization on shop.", "Support SWF 1.540"]}}
+{"8.4": {"files": [["Core.py", "init"], ["Others.py", "modules"], ["ParsePackets.py", "modules"]], "changelog": ["Fix radios."]}}
